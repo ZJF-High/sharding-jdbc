@@ -1,0 +1,47 @@
+#服务端口
+server:
+  port: 8888
+#服务名
+spring:
+  application:
+    name: sharding-jdbc-examples
+  http:
+    encoding:
+      enabled: true
+      charset: utf-8
+      force: true
+  main:
+    allow-bean-definition-overriding: true
+  #shardingsphere相关配置
+  shardingsphere:
+    datasource:
+      names: m1   #配置库的名字，随意
+      m1:   #配置目前m1库的数据源信息
+        type: com.alibaba.druid.pool.DruidDataSource
+        driverClassName: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/shop?useUnicode=true
+        username: root
+        password: 123456
+    sharding:
+      tables:
+        shop:  # 指定shop表的数据分布情况，配置数据节点
+          actualDataNodes: m1.shop_0$->{1..2}
+          tableStrategy:
+            inline:   # 指定shop表的分片策略，分片策略包括分片键和分片算法
+              shardingColumn: id
+              algorithmExpression: shop_0$->{id % 2 + 1}
+          keyGenerator:   # 指定shop表的主键生成策略为SNOWFLAKE
+            type: SNOWFLAKE  #主键生成策略为SNOWFLAKE
+            column: id  #指定主键
+    props:
+      sql:
+        show: true
+
+#日志打印
+logging:
+  level:
+    root: info
+    org.springframework.web: info
+    com.lucifer.sharding.dao: debug
+    druid.sql: debug
+
